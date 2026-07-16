@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,7 +27,18 @@ class Settings(BaseSettings):
     cors_origins: list[Union[AnyHttpUrl, str]] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://teamflow-fe.vercel.app",
     ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: object) -> object:
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("["):
+                return value
+            return [origin.strip() for origin in stripped.split(",") if origin.strip()]
+        return value
 
 
 settings = Settings()
