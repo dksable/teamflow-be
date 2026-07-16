@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     resend_api_key: Optional[str] = None
     frontend_app_url: str = "http://localhost:5173"
     invitation_token_expire_hours: int = 24
+    run_migrations_on_startup: bool = True
     cors_origins: str = (
         "http://localhost:5173,"
         "http://127.0.0.1:5173,"
