@@ -1,4 +1,6 @@
 from pathlib import Path
+from datetime import datetime, timezone
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,6 +12,7 @@ from app.core.database import Base, get_db
 from app.core.security import create_access_token, hash_password
 from app.main import app
 from app.models.auth import Role, User
+from app.models.holiday_document import HolidayDocument
 
 
 engine = create_engine(
@@ -202,6 +205,32 @@ def test_authenticated_user_can_get_latest_document(
     assert response.json()["original_file_name"] == "holidays.csv"
 
 
+def test_latest_document_returns_404_when_empty(client: TestClient, view_headers: dict[str, str]):
+    response = client.get("/api/holiday-documents/latest", headers=view_headers)
+
+    assert response.status_code == 404
+
+
+def test_latest_document_uses_uploaded_at_desc(
+    client: TestClient,
+    db_session: Session,
+    admin_headers: dict[str, str],
+    view_headers: dict[str, str],
+):
+    older = upload_document(client, admin_headers, "older.pdf", b"%PDF-1.4\n%%EOF", "application/pdf").json()
+    newer = upload_document(client, admin_headers, "newer.pdf", b"%PDF-1.4\n%%EOF", "application/pdf").json()
+    older_document = db_session.get(HolidayDocument, uuid.UUID(older["id"]))
+    newer_document = db_session.get(HolidayDocument, uuid.UUID(newer["id"]))
+    older_document.uploaded_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    newer_document.uploaded_at = datetime(2026, 1, 2, tzinfo=timezone.utc)
+    db_session.commit()
+
+    response = client.get("/api/holiday-documents/latest", headers=view_headers)
+
+    assert response.status_code == 200
+    assert response.json()["original_file_name"] == "newer.pdf"
+
+
 def test_collection_list_endpoint_is_not_available(
     client: TestClient,
     view_headers: dict[str, str],
@@ -230,6 +259,23 @@ def test_pdf_view_endpoint_returns_inline_disposition(
 
     assert response.status_code == 200
     assert "inline" in response.headers["content-disposition"]
+
+
+def test_view_user_can_view_document(client: TestClient, admin_headers: dict[str, str], view_headers: dict[str, str]):
+    document = upload_document(
+        client,
+        admin_headers,
+        "holidays.pdf",
+        b"%PDF-1.4\n%%EOF",
+        "application/pdf",
+    ).json()
+
+    response = client.get(
+        f"/api/holiday-documents/{document['id']}/view",
+        headers=view_headers,
+    )
+
+    assert response.status_code == 200
 
 
 def test_download_endpoint_returns_attachment_disposition(
