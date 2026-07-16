@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
 
-from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,21 +23,15 @@ class Settings(BaseSettings):
     resend_api_key: Optional[str] = None
     frontend_app_url: str = "http://localhost:5173"
     invitation_token_expire_hours: int = 24
-    cors_origins: list[Union[AnyHttpUrl, str]] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://teamflow-fe.vercel.app",
-    ]
+    cors_origins: str = (
+        "http://localhost:5173,"
+        "http://127.0.0.1:5173,"
+        "https://teamflow-fe.vercel.app"
+    )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, value: object) -> object:
-        if isinstance(value, str):
-            stripped = value.strip()
-            if stripped.startswith("["):
-                return value
-            return [origin.strip() for origin in stripped.split(",") if origin.strip()]
-        return value
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 settings = Settings()
