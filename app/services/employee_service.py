@@ -48,6 +48,7 @@ class EmployeeService:
             last_name=payload.last_name,
             email=payload.email,
             date_of_birth=payload.date_of_birth,
+            designation=payload.designation,
             role=payload.role,
             user=user,
         )
@@ -73,6 +74,7 @@ class EmployeeService:
             last_name=created.last_name,
             email=created.email,
             date_of_birth=created.date_of_birth,
+            designation=created.designation,
             role=created.role,
             account_status=created.account_status,
             created_at=created.created_at,

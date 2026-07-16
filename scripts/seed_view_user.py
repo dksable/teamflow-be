@@ -59,6 +59,7 @@ def seed_view_user() -> None:
                 last_name="Viewer",
                 email=VIEW_EMAIL,
                 date_of_birth=date(1995, 1, 1),
+                designation="Software Engineer",
                 role="view",
                 user=user,
             )
@@ -67,6 +68,7 @@ def seed_view_user() -> None:
             employee.employee_id = employee.employee_id or VIEW_EMPLOYEE_ID
             employee.first_name = "WorkPilot"
             employee.last_name = "Viewer"
+            employee.designation = "Software Engineer"
             employee.role = "view"
             employee.user = user
 

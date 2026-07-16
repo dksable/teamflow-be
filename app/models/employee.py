@@ -21,6 +21,7 @@ class Employee(Base):
     last_name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     date_of_birth: Mapped[date] = mapped_column(Date)
+    designation: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(20), default="view", server_default="view")
     user_id: Mapped[Optional[int]] = mapped_column(
         Integer,

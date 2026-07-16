@@ -85,6 +85,7 @@ def employee(db_session: Session):
         last_name="Sharma",
         email="rahul@example.com",
         date_of_birth=date(1995, 1, 1),
+        designation="Software Engineer",
         role="view",
     )
     other = Employee(
@@ -93,6 +94,7 @@ def employee(db_session: Session):
         last_name="Patel",
         email="priya@example.com",
         date_of_birth=date(1996, 1, 1),
+        designation="QA Engineer",
         role="view",
     )
     db_session.add_all([employee, other])

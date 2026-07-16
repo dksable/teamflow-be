@@ -111,6 +111,7 @@ def employee_payload(**overrides):
         "last_name": "Sharma",
         "email": "rahul.sharma@teamflow.com",
         "date_of_birth": "1995-06-15",
+        "designation": "Software Engineer",
     }
     payload.update(overrides)
     return payload
@@ -127,6 +128,7 @@ def test_admin_can_create_employee(client: TestClient, admin_headers: dict[str, 
     data = response.json()
     assert data["employee_id"] == "EMP-1001"
     assert data["email"] == "rahul.sharma@teamflow.com"
+    assert data["designation"] == "Software Engineer"
     assert "id" in data
     assert data["role"] == "view"
     assert data["account_status"] == "invited"
@@ -357,6 +359,16 @@ def test_future_date_of_birth_is_rejected(
     assert response.status_code == 422
 
 
+def test_designation_is_required(client: TestClient, admin_headers: dict[str, str]):
+    response = client.post(
+        "/api/employees",
+        json=employee_payload(designation=""),
+        headers=admin_headers,
+    )
+
+    assert response.status_code == 422
+
+
 def test_employee_list_returns_created_employees(
     client: TestClient,
     admin_headers: dict[str, str],
@@ -399,6 +411,7 @@ def test_employee_list_is_sorted_by_newest_first(
         last_name="Employee",
         email="older@teamflow.com",
         date_of_birth=date(1990, 1, 1),
+        designation="QA Engineer",
         created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
         updated_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
     )
@@ -408,6 +421,7 @@ def test_employee_list_is_sorted_by_newest_first(
         last_name="Employee",
         email="newer@teamflow.com",
         date_of_birth=date(1991, 1, 1),
+        designation="Senior Software Engineer",
         created_at=datetime(2026, 1, 2, tzinfo=timezone.utc),
         updated_at=datetime(2026, 1, 2, tzinfo=timezone.utc),
     )
@@ -432,13 +446,18 @@ def test_admin_can_update_employee(client: TestClient, admin_headers: dict[str, 
 
     response = client.patch(
         f"/api/employees/{created['id']}",
-        json={"first_name": "Rohit", "email": "ROHIT.SHARMA@TEAMFLOW.COM"},
+        json={
+            "first_name": "Rohit",
+            "email": "ROHIT.SHARMA@TEAMFLOW.COM",
+            "designation": "Lead Software Engineer",
+        },
         headers=admin_headers,
     )
 
     assert response.status_code == 200
     assert response.json()["first_name"] == "Rohit"
     assert response.json()["email"] == "rohit.sharma@teamflow.com"
+    assert response.json()["designation"] == "Lead Software Engineer"
 
 
 def test_admin_can_update_employee_role(

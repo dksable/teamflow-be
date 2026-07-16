@@ -16,9 +16,10 @@ class EmployeeCreate(BaseModel):
     last_name: str = Field(..., min_length=1, examples=["Sharma"])
     email: str = Field(..., min_length=1, examples=["rahul.sharma@teamflow.com"])
     date_of_birth: date = Field(..., examples=["1995-06-15"])
+    designation: str = Field(..., min_length=1, examples=["Software Engineer"])
     role: str = Field(default="view", examples=["view"])
 
-    @field_validator("employee_id", "first_name", "last_name", mode="before")
+    @field_validator("employee_id", "first_name", "last_name", "designation", mode="before")
     @classmethod
     def trim_required_text(cls, value: object) -> object:
         if isinstance(value, str):
@@ -67,9 +68,10 @@ class EmployeeUpdate(BaseModel):
     last_name: Optional[str] = Field(default=None, min_length=1, examples=["Sharma"])
     email: Optional[str] = Field(default=None, min_length=1, examples=["rahul.sharma@teamflow.com"])
     date_of_birth: Optional[date] = Field(default=None, examples=["1995-06-15"])
+    designation: Optional[str] = Field(default=None, min_length=1, examples=["Software Engineer"])
     role: Optional[str] = Field(default=None, examples=["view"])
 
-    @field_validator("employee_id", "first_name", "last_name", mode="before")
+    @field_validator("employee_id", "first_name", "last_name", "designation", mode="before")
     @classmethod
     def trim_optional_text(cls, value: object) -> object:
         if isinstance(value, str):
@@ -129,6 +131,7 @@ class EmployeeResponse(BaseModel):
     last_name: str
     email: str
     date_of_birth: date
+    designation: str
     role: str
     account_status: str
     created_at: datetime
