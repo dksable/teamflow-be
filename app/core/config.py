@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     email_from_name: str = "WorkPilot"
     email_from_address: str = "noreply@example.com"
     resend_api_key: Optional[str] = None
-    frontend_app_url: str = "http://localhost:5173"
+    frontend_app_url: str = "https://teamflow-fe.vercel.app"
     invitation_token_expire_hours: int = 24
     run_migrations_on_startup: bool = True
     cors_origins: str = (

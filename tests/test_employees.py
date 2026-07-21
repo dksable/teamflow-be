@@ -174,6 +174,35 @@ def test_employee_create_creates_linked_invited_user(
     assert invitation.token_hash not in response.text
 
 
+def test_employee_invitation_email_uses_configured_frontend_url(
+    client: TestClient,
+    admin_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+):
+    from app.core.config import settings
+    from app.services.email_service import EmailResult, EmailService
+
+    sent_urls: dict[str, str] = {}
+    monkeypatch.setattr(settings, "frontend_app_url", "https://teamflow-fe.vercel.app/")
+
+    def capture_invitation(_self, email):
+        sent_urls["login_url"] = email.login_url
+        sent_urls["set_password_url"] = email.set_password_url
+        return EmailResult(sent=True)
+
+    monkeypatch.setattr(EmailService, "send_invitation", capture_invitation)
+
+    response = client.post(
+        "/api/employees",
+        json=employee_payload(),
+        headers=admin_headers,
+    )
+
+    assert response.status_code == 201
+    assert sent_urls["login_url"] == "https://teamflow-fe.vercel.app/login"
+    assert sent_urls["set_password_url"].startswith("https://teamflow-fe.vercel.app/set-password?token=")
+
+
 def test_invited_user_cannot_login_before_password_setup(
     client: TestClient,
     admin_headers: dict[str, str],
